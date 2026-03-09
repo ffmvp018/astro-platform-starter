@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFH4X - DianaX System V12 PRO</title>
+    <style>
+        :root {
+            --primary: #00ff88;
+            --bg: #050505;
+            --panel: rgba(10, 10, 10, 0.98);
+            --text: #ffffff;
+            --danger: #ff4655;
+            --tiktok: #25f4ee;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
+        }
+
+        /* FUNDO DO JOGO SIMULADO */
+        #game-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://wallpaperaccess.com/full/1510461.jpg') no-repeat center center;
+            background-size: cover; z-index: -1; filter: brightness(0.3);
+            display: none;
+        }
+
+        /* TELA DE LOGIN */
+        .modal-screen {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; padding: 25px; background: #111;
+            border: 1px solid var(--primary); border-radius: 12px; text-align: center;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.2); z-index: 100;
+        }
+
+        .login-input {
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: #1a1a1a; border: 1px solid #333; color: white;
+            border-radius: 6px; box-sizing: border-box; outline: none;
+        }
+
+        .login-btn {
+            width: 100%; padding: 12px; background: var(--primary);
+            border: none; color: black; font-weight: bold; cursor: pointer; border-radius: 6px;
+        }
+
+        /* PAINEL FLUTUANTE */
+        #main-panel {
+            display: none; width: 330px; background: var(--panel);
+            border: 1px solid var(--primary); border-radius: 12px;
+            position: absolute; top: 20px; left: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); z-index: 99;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            padding: 12px; display: flex; justify-content: space-between;
+            align-items: center; background: rgba(0, 255, 136, 0.15);
+            border-bottom: 1px solid #333; cursor: grab;
+        }
+
+        .glitch {
+            font-size: 1rem; color: var(--primary); font-weight: bold;
+            text-shadow: 1px 0 red; animation: shake 1s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            75% { transform: translateX(1px); }
+        }
+
+        .btn-open-ff {
+            width: 90%; margin: 10px auto; display: block; padding: 12px;
+            background: linear-gradient(90deg, #ff4b2b, #ff8800);
+            border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3);
+        }
+
+        /* ABAS */
+        .tabs { display: flex; justify-content: space-around; padding: 8px; background: #000; font-size: 0.65rem; }
+        .tab-btn { color: #555; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        .tab-btn.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+
+        .content-section { display: none; padding: 15px; height: 210px; overflow-y: auto; }
+        .content-section.active { display: block; }
+
+        .menu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 13px; }
+
+        /* SWITCH TOGGLE */
+        .switch { width: 34px; height: 18px; position: relative; display: inline-block; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 20px; }
+        input:checked + .slider { background-color: var(--primary); box-shadow: 0 0 5px var(--primary); }
+
+        /* BOTÃO INJETAR */
+        .inject-container { padding: 12px 15px; }
+        #btn-inject {
+            width: 100%; padding: 12px; background: transparent; 
+            border: 2px solid var(--primary); color: var(--primary); 
+            font-weight: bold; cursor: pointer; border-radius: 8px;
+            text-transform: uppercase; transition: 0.3s;
+        }
+
+        .footer { text-align: center; padding: 10px; font-size: 10px; border-top: 1px solid #222; opacity: 0.8; }
+        .footer a { color: var(--tiktok); text-decoration: none; font-weight: bold; }
+
+        /* ÍCONE DE RESTAURAR */
+        #restore-icon {
+            position: fixed; top: 25px; left: 25px; width: 50px; height: 50px;
+            background: var(--primary); border-radius: 50%; cursor: pointer;
+            display: none; box-shadow: 0 0 15px var(--primary);
+            z-index: 1000; text-align: center; line-height: 50px; color: black; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="game-bg"></div>
+
+    <div id="login-screen" class="modal-screen">
+        <h2 style="color: var(--primary); margin-top: 0;">DIANAX V12 PRO</h2>
+        <input type="text" id="user" class="login-input" placeholder="Usuário">
+        <input type="password" id="pass" class="login-input" placeholder="Senha">
+        <button class="login-btn" onclick="checkLogin()">CONECTAR SISTEMA</button>
+        <p style="color: #555; font-size: 10px; margin-top: 15px;">Desenvolvido por @fxdeusa8x</p>
+    </div>
+
+    <div id="main-panel">
+        <div class="header">
+            <span class="glitch">FFH4X — DIANAX V12</span>
+            <button onclick="minimizePanel()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-weight:bold; font-size: 18px;">−</button>
+        </div>
+
+        <button class="btn-open-ff" id="ff-starter" onclick="startFFInApp()">▶ ABRIR JOGO NO APP</button>
+
+        <div class="tabs">
+            <div class="tab-btn active" onclick="openTab('aim', this)">Aimbot</div>
+            <div class="tab-btn" onclick="openTab('mods', this)">Mods</div>
+            <div class="tab-btn" onclick="openTab('move', this)">Movimento</div>
+        </div>
+
+        <div id="aim" class="content-section active">
+            <div class="menu-item"><span>Aimbot Cabeça</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Aimbot Pescoço</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Aimbot Peito</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+        </div>
+
+        <div id="mods" class="content-section">
+            <div class="menu-item"><span>Auto-Loot (Coleta)</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Espingarda Rápida</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Remover Recoil</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+        </div>
+
+        <div id="move" class="content-section">
+            <div class="menu-item"><span>Velocidade 2x</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Pulo Duplo</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+            <div class="menu-item"><span>Anti-Ban Safe Mode</span><label class="switch"><input type="checkbox" class="feat"><span class="slider"></span></label></div>
+        </div>
+
+        <div class="inject-container">
+            <button id="btn-inject" onclick="inject()">INJETAR CÓDIGOS</button>
+        </div>
+
+        <div class="footer">
+            DIANAX PREMIUM — <a href="https://www.tiktok.com/@fxdeusa8x">@fxdeusa8x</a>
+        </div>
+    </div>
+
+    <div id="restore-icon" onclick="restorePanel()">ON</div>
+
+    <script>
+        // CONFIGURAÇÕES GERAIS
+        const expireDate = new Date(2026, 3, 8); // Expira em 8 de Abril de 2026
+
+        function checkLogin() {
+            // Verifica se a licença expirou
+            if (new Date() > expireDate) { 
+                alert("Painel Expirado! Renove sua licença com @fxdeusa8x"); 
+                return; 
+            }
+            
+            // Pega os valores (Login: diana | Senha: 18)
+            const u = document.getElementById('user').value.trim().toLowerCase();
+            const p = document.getElementById('pass').value.trim();
+
+            if(u === "diana" && p === "18") {
+                // Inicia a música
+                const music = document.getElementById('bg-music');
+                if(music) music.play();
+
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-panel').style.display = 'block';
+            } else {
+                alert("ERRO: Dados de acesso incorretos!");
+            }
+        }
+
+        function startFFInApp() {
+            const btn = document.getElementById('ff-starter');
+            btn.innerText = "INICIANDO JOGO...";
+            setTimeout(() => {
+                document.getElementById('game-bg').style.display = 'block';
+                btn.innerText = "FREE FIRE ATIVO";
+                btn.style.background = "#00ff88";
+                btn.style.color = "black";
+            }, 2000);
+        }
+
+        function openTab(id, el) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function inject() {
+            const b = document.getElementById('btn-inject');
+            b.innerText = "INJETANDO...";
+            b.disabled = true;
+            setTimeout(() => { 
+                b.innerText = "CÓDIGOS INJETADOS!"; 
+                b.style.background = "rgba(0, 255, 136, 0.2)";
+            }, 5000);
+        }
+
+        document.querySelectorAll('.feat').forEach(i => {
+            i.addEventListener('change', () => {
+                const b = document.getElementById('btn-inject');
+                b.disabled = false;
+                b.innerText = "INJETAR CÓDIGOS";
+                b.style.background = "transparent";
+            });
+        });
+
+        function minimizePanel() {
+            document.getElementById('main-panel').style.display = 'none';
+            document.getElementById('restore-icon').style.display = 'block';
+        }
+
+        function restorePanel() {
+            document.getElementById('main-panel').style.display = 'block';
+            document.getElementById('restore-icon').style.display = 'none';
+        }
+    </script>
+</body>
+</html> <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="https://via.placeholder.com/180x180/00ff88/000000?text=DX">
